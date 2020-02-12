@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <title>The Game Loop</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="scripts.js"></script>
+    </head>
+
+    <body>
+        <header>
+            Browser Game Loop
+        </header>
+        <main>
+            <div id="console-container"></div>
+            <div id="form-container">
+                <form method="post" action="javascript:addEvent(intervalName.value, intervalNumber.value, numberOfIntervals.value)">
+                <div class="row">
+                    <div class="col-50">
+                        <label>Name: </label>
+                    </div>
+                    <div class="col-50">
+                        <input type="text" id="intervalName">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-50">
+                        <label>Interval: </label>
+                    </div>
+                    <div class="col-50">
+                        <input type="number" id="intervalNumber">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-50">
+                        <label># Times: </label>
+                    </div>
+                    <div class="col-50">
+                        <input type="number" id="numberOfIntervals">
+                    </div>
+                </div>
+                <div class="row">
+                    <button type="submit">Add Event</button>
+                </div>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            Created for CS 5410
+        </footer>
+    </body>
+</html>
