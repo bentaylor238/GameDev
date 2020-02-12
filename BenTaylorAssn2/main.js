@@ -3,7 +3,7 @@ let canvas = null;
 let context = null;
 
 const COORD_SIZE = 1024;
-const MAX_CELLS = 3;
+const MAX_CELLS = 5;
 
 let imgFloor = new Image();
 imgFloor.isReady = false;
@@ -59,77 +59,86 @@ function generateMaze() {
     includeNeighbors(maze[0][0]);
     while (mazeCells.length > 0) {
         var randomCell = mazeCells.splice(Math.floor(Math.random() * mazeCells.length), 1);
+        randomCell = randomCell[0];
         console.log("GENERATE NEXT");
-        // console.log(randomCell);
+        console.log(randomCell);
         includeNeighbors(randomCell);
         console.log("FINISHED INCLUDING NEIGHBORS FOR " + randomCell);
         while (true) {
             var wall = Math.floor(Math.random() * 4);
-            if (wall === 0 && randomCell.n) {
-                if (randomCell.n.inMaze) {
-                    randomCell.n.s = null;
-                    randomCell.n = null;
-                    break;
-                }
+            if (wall === 0 && randomCell.n && randomCell.n.inMaze) {
+                randomCell.n.s = null;
+                randomCell.n = null;
+                break;
             }
-            else if (wall === 1 && randomCell.e) {
-                if (randomCell.e.inMaze) {
-                    randomCell.e.w = null;
-                    randomCell.e = null;
-                    break;
-                }
+            else if (wall === 1 && randomCell.e && randomCell.e.inMaze) {
+                randomCell.e.w = null;
+                randomCell.e = null;
+                break;
             }
-            else if (wall === 2 && randomCell.s) {
-                if (randomCell.s.inMaze) {
-                    randomCell.s.n = null;
-                    randomCell.s = null;
-                    break;
-                }
+            else if (wall === 2 && randomCell.s && randomCell.s.inMaze) {
+                randomCell.s.n = null;
+                randomCell.s = null;
+                break;
             }
-            else if (wall === 3 && randomCell.w) {
-                if (randomCell.w.inMaze) {
-                    randomCell.w.e = null;
-                    randomCell.w = null;
-                    break;
-                }
+            else if (wall === 3 && randomCell.w && randomCell.w.inMaze) {
+                randomCell.w.e = null;
+                randomCell.w = null;
+                break;
             }
         }  
-        randomCell.inMaze = true;
         randomCell.inList = false;
+        randomCell.inMaze = true;
     }
+    flipReferencesInMaze();
 }
 
 function includeNeighbors(mazeCell) {
     console.log("INCLUDING NEIGHBORS FOR " + mazeCell);
-    console.log(mazeCell);
-    if (mazeCell) {
-        if (mazeCell.n != null) {
-            var cell = mazeCell.n;
-            if (cell.inMaze === false && !cell.inList) {
-                console.log("INCLUDING NORTH CELL");
-                mazeCells.push(mazeCell.n);
-                mazeCell.n.inList = true;
+    console.log(mazeCell.n);
+    console.log(mazeCell.e);
+    console.log(mazeCell.s);
+    console.log(mazeCell.w);
+    if (mazeCell.n && !mazeCell.inMaze && !mazeCell.inList) {
+        console.log("INCLUDING NORTH CELL");
+        mazeCells.push(mazeCell.n);
+        mazeCell.n.inList = true;
+    }
+    if (mazeCell.e && !mazeCell.e.inMaze && !mazeCell.e.inList) {
+        console.log("INCLUDING EAST CELL");
+        mazeCells.push(mazeCell.e);
+        mazeCell.e.inList = true;
+    }
+    if (mazeCell.s && !mazeCell.s.inMaze && !mazeCell.s.inList) {
+        console.log("INCLUDING SOUTH CELL");
+        mazeCells.push(mazeCell.s);
+        mazeCell.s.inList = true;
+    }
+    if (mazeCell.w && !mazeCell.w.inMaze && !mazeCell.w.inList) {
+        console.log("INCLUDING WEST CELL");
+        mazeCells.push(mazeCell.w);
+        mazeCell.w.inList = true;
+    }
+}
+
+function flipReferencesInMaze() {
+    for (let row = 0; row < MAX_CELLS; row++) {
+        for (let col = 0; col < MAX_CELLS; col++) {
+            if (row > 0) {
+                if (maze[row][col].n) maze[row][col].n = null;
+                else maze[row][col].n = maze[row-1][col];
             }
-        }
-        if (mazeCell.e != null) {
-            if (!mazeCell.e.inMaze && !mazeCell.e.inList) {
-                console.log("INCLUDING EAST CELL");
-                mazeCells.push(mazeCell.e);
-                mazeCell.e.inList = true;
+            if (row < (MAX_CELLS - 1)) {
+                if (maze[row][col].s) maze[row][col].s = null;
+                else maze[row][col].s = maze[row+1][col];
             }
-        }
-        if (mazeCell.s != null) {
-            if (!mazeCell.s.inMaze && !mazeCell.s.inList) {
-                console.log("INCLUDING SOUTH CELL");
-                mazeCells.push(mazeCell.s);
-                mazeCell.s.inList = true;
+            if (col > 0) {
+                if (maze[row][col].w) maze[row][col].w = null;
+                else maze[row][col].w = maze[row][col-1];
             }
-        }
-        if (mazeCell.w != null) {
-            if (!mazeCell.w.inMaze && !mazeCell.w.inList) {
-                console.log("INCLUDING WEST CELL");
-                mazeCells.push(mazeCell.w);
-                mazeCell.w.inList = true;
+            if (col < (MAX_CELLS - 1)) {
+                if (maze[row][col].e) maze[row][col].e = null;
+                else maze[row][col].e = maze[row][col+1];
             }
         }
     }
@@ -261,7 +270,7 @@ let myCharacter = function(imageSource, location) {
         location: location,
         image: image
     };
-}('character.png', maze[1][1]);
+}('character'+MAX_CELLS+'.png', maze[0][0]);
 
 function render() {
     context.clearRect(0, 0, canvas.width, canvas.height);
