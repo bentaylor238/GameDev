@@ -1,6 +1,12 @@
 let inputBuffer = {};
 let canvas = null;
 let context = null;
+let maze = [];
+let mazeCells = [];
+let path = false;
+let hint = true;
+let bread = true;
+let score = 0;
 
 const COORD_SIZE = 1024;
 const MAX_CELLS = 5;
@@ -12,7 +18,20 @@ imgFloor.onload = function() {
 };
 imgFloor.src = 'floor.png';
 
-let maze = [];
+let imgBread = new Image();
+imgBread.isReady = false;
+imgBread.onload = function() {
+    this.isReady = true;
+};
+imgBread.src = 'bread.png';
+
+let imgHint = new Image();
+imgHint.isReady = false;
+imgHint.onload = function() {
+    this.isReady = true;
+};
+imgHint.src = 'hint.png';
+
 for (let row = 0; row < MAX_CELLS; row++) {
     maze.push([]);
     for (let col = 0; col < MAX_CELLS; col++) {
@@ -23,8 +42,10 @@ for (let row = 0; row < MAX_CELLS; row++) {
             s: null,
             w: null,
             e: null,
+            next: null,
             inMaze: false,
             inList: false,
+            hasVisited: false,
         });
     }
 }
@@ -45,16 +66,61 @@ for (let row = 0; row < MAX_CELLS; row++) {
         }
     }
 }
-
-let mazeCells = [];
-// let numInMaze = 0;
-maze[0][0].inMaze = true;
-// numInMaze += 1;
 generateMaze();
+maze[MAX_CELLS-1][MAX_CELLS-1].next = maze[MAX_CELLS-1][MAX_CELLS-1];
+generateShortestPath(maze[MAX_CELLS-1][MAX_CELLS-1]);
 
+//
+// Immediately invoked anonymous function
+//
+let myCharacter = function(imageSource, location) {
+    let image = new Image();
+    image.isReady = false;
+    image.onload = function() {
+        this.isReady = true;
+    };
+    image.src = imageSource;
+    location.hasVisited = true;
+    return {
+        location: location,
+        image: image
+    };
+}('character.png', maze[0][0]);
 
+let finishCharacter = function(imageSource, location) {
+    let image = new Image();
+    image.isReady = false;
+    image.onload = function() {
+        this.isReady = true;
+    };
+    image.src = imageSource;
+    return {
+        location: location,
+        image: image
+    };
+}('ghost.png', maze[MAX_CELLS-1][MAX_CELLS-1]);
+
+function generateShortestPath(cell) {
+    if (cell.n && cell.n.next === null) {
+        cell.n.next = cell;
+        generateShortestPath(cell.n);
+    }
+    if (cell.e && cell.e.next === null) {
+        cell.e.next = cell;
+        generateShortestPath(cell.e);
+    }
+    if (cell.s && cell.s.next === null) {
+        cell.s.next = cell;
+        generateShortestPath(cell.s);
+    }
+    if (cell.w && cell.w.next === null) {
+        cell.w.next = cell;
+        generateShortestPath(cell.w);
+    }
+}
 
 function generateMaze() {
+    maze[0][0].inMaze = true;
     console.log("BEGIN GENERATION");
     includeNeighbors(maze[0][0]);
     while (mazeCells.length > 0) {
@@ -125,49 +191,20 @@ function flipReferencesInMaze() {
     for (let row = 0; row < MAX_CELLS; row++) {
         for (let col = 0; col < MAX_CELLS; col++) {
             if (row > 0) {
-                if (maze[row][col].n) maze[row][col].n = null;
-                else maze[row][col].n = maze[row-1][col];
+                maze[row][col].n = maze[row][col].n ? null : maze[row-1][col];
             }
             if (row < (MAX_CELLS - 1)) {
-                if (maze[row][col].s) maze[row][col].s = null;
-                else maze[row][col].s = maze[row+1][col];
+                maze[row][col].s = maze[row][col].s ? null : maze[row+1][col];
             }
             if (col > 0) {
-                if (maze[row][col].w) maze[row][col].w = null;
-                else maze[row][col].w = maze[row][col-1];
+                maze[row][col].w = maze[row][col].w ? null : maze[row][col-1];
             }
             if (col < (MAX_CELLS - 1)) {
-                if (maze[row][col].e) maze[row][col].e = null;
-                else maze[row][col].e = maze[row][col+1];
+                maze[row][col].e = maze[row][col].e ? null : maze[row][col+1];
             }
         }
     }
 }
-
-// maze[0][0].s = maze[1][0];
-
-// maze[0][1].s = maze[1][1];
-// maze[0][1].e = maze[0][2];
-
-// maze[0][2].w = maze[0][1];
-// maze[0][2].s = maze[1][2];
-
-// maze[1][0].n = maze[0][0];
-// maze[1][0].e = maze[1][1];
-// maze[1][0].s = maze[2][0];
-
-// maze[1][1].n = maze[0][1];
-// maze[1][1].s = maze[2][1];
-// maze[1][1].w = maze[1][0];
-
-// maze[1][2].n = maze[0][2];
-
-// maze[2][0].n = maze[1][0];
-
-// maze[2][1].n = maze[1][1];
-// maze[2][1].e = maze[2][2];
-
-// maze[2][2].w = maze[2][1];
 
 function drawCell(cell) {
 
@@ -175,6 +212,12 @@ function drawCell(cell) {
         context.drawImage(imgFloor,
         cell.x * (COORD_SIZE / MAX_CELLS), cell.y * (COORD_SIZE / MAX_CELLS),
         COORD_SIZE / MAX_CELLS + 0.5, COORD_SIZE / MAX_CELLS + 0.5);
+    }
+
+    if (bread && cell.hasVisited && imgBread.isReady) {
+        context.drawImage(imgBread,
+            cell.x * (COORD_SIZE / MAX_CELLS) + 15, cell.y * (COORD_SIZE / MAX_CELLS) + 15,
+            COORD_SIZE / MAX_CELLS / 2, COORD_SIZE /MAX_CELLS / 2);
     }
 
     if (cell.n === null) {
@@ -209,7 +252,42 @@ function drawCell(cell) {
 function renderCharacter(character) {
     if (character.image.isReady) {
         context.drawImage(character.image,
-        character.location.x * (COORD_SIZE / MAX_CELLS), character.location.y * (COORD_SIZE / MAX_CELLS));
+            character.location.x * (COORD_SIZE / MAX_CELLS), character.location.y * (COORD_SIZE / MAX_CELLS),
+            (COORD_SIZE / MAX_CELLS), (COORD_SIZE / MAX_CELLS));
+        if (path && imgHint.isReady) {
+            renderHint(character.location.next);
+        }
+        else if (hint && character.location.next != character.location.next.next) {
+            context.drawImage(imgHint,
+                character.location.next.x * (COORD_SIZE / MAX_CELLS), 
+                character.location.next.y * (COORD_SIZE / MAX_CELLS),
+                COORD_SIZE / MAX_CELLS + 0.5, COORD_SIZE / MAX_CELLS + 0.5);
+        }
+    }
+}
+
+function renderFinishCharacter(character) {
+    if (character.image.isReady) {
+        context.drawImage(character.image,
+            character.location.x * (COORD_SIZE / MAX_CELLS), character.location.y * (COORD_SIZE / MAX_CELLS),
+            (COORD_SIZE / MAX_CELLS), (COORD_SIZE / MAX_CELLS));
+    }
+}
+
+function renderHint(cell) {
+    if (cell && cell.next !== cell) {
+        context.drawImage(imgHint,
+            cell.x * (COORD_SIZE / MAX_CELLS), 
+            cell.y * (COORD_SIZE / MAX_CELLS),
+            COORD_SIZE / MAX_CELLS + 0.5, COORD_SIZE / MAX_CELLS + 0.5);
+        renderHint(cell.next);
+    }
+}
+
+function updateVisitedAndScore(character) {
+    if (!character.location.hasVisited) {
+        character.location.hasVisited = true;
+        score += 5;
     }
 }
 
@@ -217,22 +295,35 @@ function moveCharacter(key, character) {
     if (key === 'ArrowDown') {
         if (character.location.s) {
             character.location = character.location.s;
+            updateVisitedAndScore(character);
         }
     }
     if (key == 'ArrowUp') {
         if (character.location.n) {
             character.location = character.location.n;
+            updateVisitedAndScore(character);
         }
     }
     if (key == 'ArrowRight') {
         if (character.location.e) {
             character.location = character.location.e;
+            updateVisitedAndScore(character);
         }
     }
     if (key == 'ArrowLeft') {
         if (character.location.w) {
             character.location = character.location.w;
+            updateVisitedAndScore(character);
         }
+    }
+    if (key == 'p') {
+        path = !path;
+    }
+    if (key == 'h') {
+        hint = !hint;
+    }
+    if (key == 'b') {
+        bread = !bread;
     }
 }
 
@@ -256,26 +347,11 @@ function renderMaze() {
     context.stroke();
 }
 
-//
-// Immediately invoked anonymous function
-//
-let myCharacter = function(imageSource, location) {
-    let image = new Image();
-    image.isReady = false;
-    image.onload = function() {
-        this.isReady = true;
-    };
-    image.src = imageSource;
-    return {
-        location: location,
-        image: image
-    };
-}('character'+MAX_CELLS+'.png', maze[0][0]);
-
 function render() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     renderMaze();
+    renderFinishCharacter(finishCharacter);
     renderCharacter(myCharacter);
 }
 
@@ -291,16 +367,15 @@ function gameLoop() {
     render();
 
     requestAnimationFrame(gameLoop);
-
 }
 
 function initialize() {
     canvas = document.getElementById('canvas-main');
     context = canvas.getContext('2d');
 
-    window.addEventListener('keydown', function(event) {
+    window.addEventListener('keyup', function(event) {
         inputBuffer[event.key] = event.key;
     });
-
+    
     requestAnimationFrame(gameLoop);
 }
