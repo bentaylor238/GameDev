@@ -4,12 +4,25 @@ let context = null;
 let maze = [];
 let mazeCells = [];
 let path = false;
-let hint = true;
-let bread = true;
+let hint = false;
+let bread = false;
+let hasWon = false;
 let score = 0;
+let previousTime = null;
+let totalTime = null;
+let time = 0;
+let myCharacter = null;
+let finishCharacter = null;
+let highscores = [];
+let previousScores = localStorage.getItem('highscores');
+if (previousScores !== null) {
+    highscores = JSON.parse(previousScores);
+    console.log("Grabbed previous highscores: " + highscores);
+    console.log(previousScores);
+}
 
 const COORD_SIZE = 1024;
-const MAX_CELLS = 5;
+let MAX_CELLS = 20;
 
 let imgFloor = new Image();
 imgFloor.isReady = false;
@@ -32,62 +45,17 @@ imgHint.onload = function() {
 };
 imgHint.src = 'hint.png';
 
-for (let row = 0; row < MAX_CELLS; row++) {
-    maze.push([]);
-    for (let col = 0; col < MAX_CELLS; col++) {
-        maze[row].push({
-            x: col,
-            y: row,
-            n: null,
-            s: null,
-            w: null,
-            e: null,
-            next: null,
-            inMaze: false,
-            inList: false,
-            hasVisited: false,
-        });
-    }
-}
-
-for (let row = 0; row < MAX_CELLS; row++) {
-    for (let col = 0; col < MAX_CELLS; col++) {
-        if (row > 0) {
-            maze[row][col].n = maze[row-1][col];
-        }
-        if (row < (MAX_CELLS - 1)) {
-            maze[row][col].s = maze[row+1][col];
-        }
-        if (col > 0) {
-            maze[row][col].w = maze[row][col-1];
-        }
-        if (col < (MAX_CELLS - 1)) {
-            maze[row][col].e = maze[row][col+1];
-        }
-    }
-}
-generateMaze();
-maze[MAX_CELLS-1][MAX_CELLS-1].next = maze[MAX_CELLS-1][MAX_CELLS-1];
-generateShortestPath(maze[MAX_CELLS-1][MAX_CELLS-1]);
+// generateMaze();
+// maze[MAX_CELLS-1][MAX_CELLS-1].next = maze[MAX_CELLS-1][MAX_CELLS-1];
+// generateShortestPath(maze[MAX_CELLS-1][MAX_CELLS-1]);
 
 //
 // Immediately invoked anonymous function
 //
-let myCharacter = function(imageSource, location) {
-    let image = new Image();
-    image.isReady = false;
-    image.onload = function() {
-        this.isReady = true;
-    };
-    image.src = imageSource;
-    location.hasVisited = true;
-    return {
-        location: location,
-        image: image
-    };
-}('character.png', maze[0][0]);
+// let myCharacter = createCharacter('character.png', maze[0][0]);
+// let finishCharacter = createCharacter('ghost.png', maze[MAX_CELLS-1][MAX_CELLS-1]);
 
-let finishCharacter = function(imageSource, location) {
+function createCharacter(imageSource, location) {
     let image = new Image();
     image.isReady = false;
     image.onload = function() {
@@ -98,7 +66,7 @@ let finishCharacter = function(imageSource, location) {
         location: location,
         image: image
     };
-}('ghost.png', maze[MAX_CELLS-1][MAX_CELLS-1]);
+}
 
 function generateShortestPath(cell) {
     if (cell.n && cell.n.next === null) {
@@ -119,17 +87,51 @@ function generateShortestPath(cell) {
     }
 }
 
+function initializeMaze() {
+    for (let row = 0; row < MAX_CELLS; row++) {
+        maze.push([]);
+        for (let col = 0; col < MAX_CELLS; col++) {
+            maze[row].push({
+                x: col,
+                y: row,
+                n: null,
+                s: null,
+                w: null,
+                e: null,
+                next: null,
+                inMaze: false,
+                inList: false,
+                hasVisited: false,
+            });
+        }
+    }
+    
+    for (let row = 0; row < MAX_CELLS; row++) {
+        for (let col = 0; col < MAX_CELLS; col++) {
+            if (row > 0) {
+                maze[row][col].n = maze[row-1][col];
+            }
+            if (row < (MAX_CELLS - 1)) {
+                maze[row][col].s = maze[row+1][col];
+            }
+            if (col > 0) {
+                maze[row][col].w = maze[row][col-1];
+            }
+            if (col < (MAX_CELLS - 1)) {
+                maze[row][col].e = maze[row][col+1];
+            }
+        }
+    }
+}
+
 function generateMaze() {
+    initializeMaze();
     maze[0][0].inMaze = true;
-    console.log("BEGIN GENERATION");
     includeNeighbors(maze[0][0]);
     while (mazeCells.length > 0) {
         var randomCell = mazeCells.splice(Math.floor(Math.random() * mazeCells.length), 1);
         randomCell = randomCell[0];
-        console.log("GENERATE NEXT");
-        console.log(randomCell);
         includeNeighbors(randomCell);
-        console.log("FINISHED INCLUDING NEIGHBORS FOR " + randomCell);
         while (true) {
             var wall = Math.floor(Math.random() * 4);
             if (wall === 0 && randomCell.n && randomCell.n.inMaze) {
@@ -160,28 +162,19 @@ function generateMaze() {
 }
 
 function includeNeighbors(mazeCell) {
-    console.log("INCLUDING NEIGHBORS FOR " + mazeCell);
-    console.log(mazeCell.n);
-    console.log(mazeCell.e);
-    console.log(mazeCell.s);
-    console.log(mazeCell.w);
     if (mazeCell.n && !mazeCell.inMaze && !mazeCell.inList) {
-        console.log("INCLUDING NORTH CELL");
         mazeCells.push(mazeCell.n);
         mazeCell.n.inList = true;
     }
     if (mazeCell.e && !mazeCell.e.inMaze && !mazeCell.e.inList) {
-        console.log("INCLUDING EAST CELL");
         mazeCells.push(mazeCell.e);
         mazeCell.e.inList = true;
     }
     if (mazeCell.s && !mazeCell.s.inMaze && !mazeCell.s.inList) {
-        console.log("INCLUDING SOUTH CELL");
         mazeCells.push(mazeCell.s);
         mazeCell.s.inList = true;
     }
     if (mazeCell.w && !mazeCell.w.inMaze && !mazeCell.w.inList) {
-        console.log("INCLUDING WEST CELL");
         mazeCells.push(mazeCell.w);
         mazeCell.w.inList = true;
     }
@@ -223,30 +216,22 @@ function drawCell(cell) {
     if (cell.n === null) {
         context.moveTo(cell.x * (COORD_SIZE / MAX_CELLS), cell.y * (COORD_SIZE / MAX_CELLS));
         context.lineTo((cell.x + 1) * (COORD_SIZE / MAX_CELLS), cell.y * (COORD_SIZE / MAX_CELLS));
-        //context.stroke();
     }
 
     if (cell.s === null) {
         context.moveTo(cell.x * (COORD_SIZE / MAX_CELLS), (cell.y + 1) * (COORD_SIZE / MAX_CELLS));
         context.lineTo((cell.x + 1) * (COORD_SIZE / MAX_CELLS), (cell.y + 1) * (COORD_SIZE / MAX_CELLS));
-        //context.stroke();
     }
 
     if (cell.e === null) {
         context.moveTo((cell.x + 1) * (COORD_SIZE / MAX_CELLS), cell.y * (COORD_SIZE / MAX_CELLS));
         context.lineTo((cell.x + 1) * (COORD_SIZE / MAX_CELLS), (cell.y + 1) * (COORD_SIZE / MAX_CELLS));
-        //context.stroke();
     }
 
     if (cell.w === null) {
         context.moveTo(cell.x * (COORD_SIZE / MAX_CELLS), cell.y * (COORD_SIZE / MAX_CELLS));
         context.lineTo(cell.x * (COORD_SIZE / MAX_CELLS), (cell.y + 1) * (COORD_SIZE / MAX_CELLS));
-        //context.stroke();
     }
-
-    //
-    // Can do all the moveTo and lineTo commands and then render them all with a single .stroke() call.
-    context.stroke();
 }
 
 function renderCharacter(character) {
@@ -284,36 +269,41 @@ function renderHint(cell) {
     }
 }
 
-function updateVisitedAndScore(character) {
+function updateVisitedAndScore(character, start) {
     if (!character.location.hasVisited) {
         character.location.hasVisited = true;
-        score += 5;
+        start.next === character.location ? score += 5 : score -= 2;
     }
+    if (character.location === maze[MAX_CELLS - 1][MAX_CELLS - 1]) hasWon = true;
 }
 
 function moveCharacter(key, character) {
-    if (key === 'ArrowDown') {
+    if (key === 'ArrowDown' || key === 's' || key === 'k') {
         if (character.location.s) {
+            let start = character.location;
             character.location = character.location.s;
-            updateVisitedAndScore(character);
+            updateVisitedAndScore(character, start);
         }
     }
-    if (key == 'ArrowUp') {
+    if (key == 'ArrowUp' || key === 'w' || key === 'i') {
         if (character.location.n) {
+            let start = character.location;
             character.location = character.location.n;
-            updateVisitedAndScore(character);
+            updateVisitedAndScore(character, start);
         }
     }
-    if (key == 'ArrowRight') {
+    if (key == 'ArrowRight' || key === 'd' || key === 'l') {
         if (character.location.e) {
+            let start = character.location;
             character.location = character.location.e;
-            updateVisitedAndScore(character);
+            updateVisitedAndScore(character, start);
         }
     }
-    if (key == 'ArrowLeft') {
+    if (key == 'ArrowLeft' || key === 'a' || key === 'j') {
         if (character.location.w) {
+            let start = character.location;
             character.location = character.location.w;
-            updateVisitedAndScore(character);
+            updateVisitedAndScore(character, start);
         }
     }
     if (key == 'p') {
@@ -330,12 +320,14 @@ function moveCharacter(key, character) {
 function renderMaze() {
     context.strokeStyle = 'rgb(255, 255, 255)';
     context.lineWidth = 6;
+    context.beginPath();
 
     for (let row = 0; row < MAX_CELLS; row++) {
         for (let col = 0; col < MAX_CELLS; col++) {
             drawCell(maze[row][col]);
         }
     }
+    context.stroke();
 
     context.beginPath();
     context.moveTo(0, 0);
@@ -362,20 +354,88 @@ function processInput() {
     inputBuffer = {};
 }
 
-function gameLoop() {
-    processInput();
-    render();
+function update(elapsedTime) {
+    totalTime += elapsedTime;
+    document.getElementById("score-id").innerHTML = score;
 
-    requestAnimationFrame(gameLoop);
+    if (totalTime > 1000) {
+        time += 1;
+        totalTime -= 1000;
+        score -= 1;
+        score = score < 0 ? 0 : score;
+        document.getElementById("time-id").innerHTML = time;
+    }
 }
 
-function initialize() {
+function gameLoop(time) {
+    let elapsedTime = time - previousTime;
+    previousTime = time;
+
+    processInput();
+    update(elapsedTime);
+    render();
+
+    if (!hasWon) {
+        requestAnimationFrame(gameLoop);
+    }
+    else {
+        alert("You win!!!");
+        console.log(highscores);
+        highscores.push(score);
+        console.log(score);
+        highscores.sort(function(a, b){return b-a});
+        highscores = highscores.splice(0, 5);
+        console.log(highscores);
+        localStorage['highscores'] = JSON.stringify(highscores);
+        let i = 1;
+        document.getElementById("highscores-id").innerHTML = "";
+        highscores.forEach(printScore);
+    }
+}
+
+function printScore(highscore, index) {
+    document.getElementById("highscores-id").innerHTML += ((index+1) + ". " + highscore + "<br>");
+    console.log(highscore);
+}
+
+function initialize(size) {
+    hasWon = true;
+//create function to reset all variables
+    MAX_CELLS = size;
+    maze = [];
+    time = 0;
+    score = 0;
+    generateMaze();
+    maze[MAX_CELLS-1][MAX_CELLS-1].next = maze[MAX_CELLS-1][MAX_CELLS-1];
+    generateShortestPath(maze[MAX_CELLS-1][MAX_CELLS-1]);
+
+    myCharacter = createCharacter("character.png", maze[0][0]);
+    myCharacter.location.hasVisited = true;
+    finishCharacter = createCharacter("ghost.png", maze[MAX_CELLS-1][MAX_CELLS-1]);
+
     canvas = document.getElementById('canvas-main');
     context = canvas.getContext('2d');
 
     window.addEventListener('keyup', function(event) {
         inputBuffer[event.key] = event.key;
     });
-    
+
+    time = 0;
+    previousTime = performance.now();
+    hasWon = false;
     requestAnimationFrame(gameLoop);
+}
+
+function init() {
+    document.getElementById("5x5-id").onclick = function () { initialize(5); };
+    console.log(document.getElementById("10x10-id").onclick);
+    document.getElementById("10x10-id").onclick = function () { initialize(10); };
+    console.log(document.getElementById("15x15-id").onclick);
+    document.getElementById("15x15-id").onclick = function () { initialize(15); };
+    console.log(document.getElementById("5x5-id").onclick);
+    document.getElementById("20x20-id").onclick = function () { initialize(20); };
+    console.log(document.getElementById("20x20-id").onclick);
+
+    document.getElementById("highscores-id").innerHTML = "";
+    highscores.forEach(printScore);
 }
