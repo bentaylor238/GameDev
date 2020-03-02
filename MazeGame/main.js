@@ -45,16 +45,6 @@ imgHint.onload = function() {
 };
 imgHint.src = 'hint.png';
 
-// generateMaze();
-// maze[MAX_CELLS-1][MAX_CELLS-1].next = maze[MAX_CELLS-1][MAX_CELLS-1];
-// generateShortestPath(maze[MAX_CELLS-1][MAX_CELLS-1]);
-
-//
-// Immediately invoked anonymous function
-//
-// let myCharacter = createCharacter('character.png', maze[0][0]);
-// let finishCharacter = createCharacter('ghost.png', maze[MAX_CELLS-1][MAX_CELLS-1]);
-
 function createCharacter(imageSource, location) {
     let image = new Image();
     image.isReady = false;
@@ -401,10 +391,16 @@ function printScore(highscore, index) {
 function initialize(size) {
     hasWon = true;
 //create function to reset all variables
+    resetVariables(size);
+    requestAnimationFrame(gameLoop);
+}
+
+function resetVariables(size) {
     MAX_CELLS = size;
     maze = [];
     time = 0;
     score = 0;
+
     generateMaze();
     maze[MAX_CELLS-1][MAX_CELLS-1].next = maze[MAX_CELLS-1][MAX_CELLS-1];
     generateShortestPath(maze[MAX_CELLS-1][MAX_CELLS-1]);
@@ -423,7 +419,6 @@ function initialize(size) {
     time = 0;
     previousTime = performance.now();
     hasWon = false;
-    requestAnimationFrame(gameLoop);
 }
 
 function init() {

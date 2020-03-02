@@ -1,0 +1,54 @@
+body {
+    background-color: black;
+    font-size: 32px;
+}
+
+header, footer, td {
+    text-align: center;
+}
+
+text {
+    color: white;
+    text-align: center;
+}
+
+input {
+    font-size: 24px;
+    background-color: white;
+    margin: 10px;
+    padding: 10px;
+    width: 150px;
+    border-radius: 16px;
+}
+
+#header-table {
+    width: 50%; 
+    height: 50%; 
+    margin-left: auto; 
+    margin-right: auto;
+}
+
+#main-table {
+    display: flex;
+}
+
+#buttons-id, #high-id {
+    width: 25%; 
+}
+
+#canvas-container {
+    border: greenyellow; 
+    border-style: solid; 
+    border-width: 1px; 
+    width: 50%;
+}
+
+#canvas-main {
+    width: 100%; 
+    height: 50%;
+}
+
+#highscores-table {
+    align-content: center; 
+    margin-left: 30px;
+}
