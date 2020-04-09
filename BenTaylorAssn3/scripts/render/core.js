@@ -24,8 +24,8 @@ MyGame.graphics = (function() {
     //
     // --------------------------------------------------------------
     function drawTexture(image, center, rotation, size) {
-        // context.save();
-
+        context.save();
+        // console.log("DRAWING" + center + size);
         context.translate(center.x, center.y);
         context.rotate(rotation);
         context.translate(-center.x, -center.y);
@@ -49,8 +49,6 @@ MyGame.graphics = (function() {
             center.y - size.height / 2,
             size.width, size.height
         );
-
-        // context.restore();
     }
 
     function drawTerrain() {
@@ -63,7 +61,6 @@ MyGame.graphics = (function() {
         for (var i = 1; i < points.length; i++) {
             context.lineTo(points[i].x, points[i].y);
         }
-        // context.moveTo(points[points.length-1].x, points[points.length-1].y);
         context.lineTo(canvas.width, canvas.height);
         context.lineTo(0, canvas.height);
         context.lineTo(points[0].x, points[0].y);
@@ -84,14 +81,15 @@ MyGame.graphics = (function() {
             context.fillStyle = "white";
         }
         context.fillText("Fuel: " + lunarLander.fuel.toFixed(3) + "%", canvas.width * 0.9, 20);
-        // console.log(lunarLander.getRotationDegrees());
-        if (lunarLander.getRotationDegrees() <= 5 || lunarLander.getRotationDegrees() >= 355) {
+
+        if (Math.floor(lunarLander.getRotationDegrees()) <= 5 || Math.ceil(lunarLander.getRotationDegrees()) >= 355) {
             context.fillStyle = "green";
         }
         else {
             context.fillStyle = "white";
         }
         context.fillText("Angle: " + lunarLander.getRotationDegrees().toFixed(3), canvas.width * 0.9, 50);
+        
         if (lunarLander.momentum < 2) {
             context.fillStyle = "green";
         }
@@ -110,7 +108,6 @@ MyGame.graphics = (function() {
         else if (hasWon) {
             context.fillText("Congratulations, you Win!", canvas.width /2, canvas.height / 2);
             context.fillText("Score: " + score, canvas.width / 2, canvas.height * 0.5 + 40);
-            console.log("RENDERING WINNING TEXT");
         }
         else context.fillText("...this is only a simulation...", canvas.width * 0.5, canvas.height / 2);
         resultsTime -= elapsedTime;

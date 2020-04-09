@@ -44,18 +44,33 @@
                         <!-- <form> -->
                             <div style="display: flex; flex-direction: row;">
                                 <p id="rotateRight"></p>
-                                <input type="text" id="rotateRight-input"/>
-                                <button id="rotateRight-button">Change Key</button>
+                                <div class="button show" id="changeKeyInitial-rr">
+                                    <button>Change Key</button>
+                                </div>
+                                <div class="button" id="changeKeyFinal-rr">
+                                    <input type="text" id="rotateRight-input"/>
+                                    <button id="rotateRight-button">Change Key</button>
+                                </div>
                             </div>
                             <div style="display: flex; flex-direction: row;">
                                 <p id="rotateLeft"></p>
-                                <input type="text" id="rotateLeft-input"/>
-                                <button id="rotateLeft-button">Change Key</button>
+                                <div class="button show" id="changeKeyInitial-rl">
+                                    <button>Change Key</button>
+                                </div>
+                                <div class="button" id="changeKeyFinal-rl">
+                                    <input type="text" id="rotateLeft-input"/>
+                                    <button id="rotateLeft-button">Change Key</button>
+                                </div>
                             </div>
                             <div style="display: flex; flex-direction: row;">
                                 <p id="thrust"></p>
-                                <input type="text" id="thrust-input"/>
-                                <button id="thrust-button">Change Key</button>
+                                <div class="button show" id="changeKeyInitial-t">
+                                    <button>Change Key</button>
+                                </div>
+                                <div class="button" id="changeKeyFinal-t">
+                                    <input type="text" id="thrust-input"/>
+                                    <button id="thrust-button">Change Key</button>
+                                </div>
                             </div>
                         <!-- </form> -->
                     </div>
@@ -79,7 +94,8 @@
                 screens : {},
                 input: {},
                 objects: {},
-                render: []
+                render: [],
+                audio: {}
             };
         </script>
         <script src = "scripts/objects/lunarlander.js"></script>
@@ -89,7 +105,13 @@
         <script src = "scripts/render/background.js"></script>
         <script src = "scripts/render/random-nums.js"></script>
         <script src = "scripts/input-keyboard.js"></script>
-    
+        <script src = "scripts/audio/explosion.js"></script>
+        <script src = "scripts/audio/thrust.js"></script>
+        <script src = "scripts/audio/landing.js"></script>
+        <script src = "scripts/particle-system-explosion.js"></script>
+        <script src = "scripts/particle-system-thrust.js"></script>
+        <script src = "scripts/particleSystem.js"></script>
+        
         <script src = "scripts/game.js"></script>
         <script src = "scripts/gameplay.js"></script>
         <script src = "scripts/mainmenu.js"></script>

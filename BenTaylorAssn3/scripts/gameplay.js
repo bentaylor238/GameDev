@@ -1,4 +1,4 @@
-MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input) {
+MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input, audio) {
     'use strict';
 
     let lastTimeStamp = performance.now();
@@ -6,7 +6,9 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
     let continuePlaying = true;
     let updatedLevel = false;
     let hasWon = false;
-    // let score = 0;//fuel / speed;
+    let isThrusting = false;
+    let isLanded = false;
+    let isExploding = 2000;
     let level = 1;
     let rotateRight = null;
     let rotateLeft = null;
@@ -29,26 +31,17 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
         moveRate: 0.05 / 1000 // pixels per millisecond
     });
 
+    let particleSystem = ParticleSystem(graphics, renderer.Random, myLunarLander);
+
     function processInput(elapsedTime) {
         myKeyboard.update(elapsedTime);
     }
 
     function update(elapsedTime) {
         myLunarLander.update(elapsedTime, graphics.points);
-        if ((myLunarLander.hasCrashed || myLunarLander.hasLanded) && !updatedLevel) {
-            if (level == 2) {
-                level = 1;
-                continuePlaying = false;
-                hasWon = myLunarLander.hasLanded;
-                console.log("DONT CONTINUE PLAYING");
-            }
-            else {
-                level = myLunarLander.hasLanded ? 2 : 1;
-                continuePlaying = myLunarLander.hasLanded;
-            }
-            updatedLevel = true;
-            // score += myLunarLander.fuel / myLunarLander.momentum;
-        }
+        particleSystem.setCenter();
+        particleSystem.update(elapsedTime);
+        checkUpdates(elapsedTime);
     }
 
     function render(elapsedTime) {
@@ -56,6 +49,7 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
         renderer.Background.render(myBackground);
         graphics.drawTerrain();
         graphics.drawStatistics(myLunarLander);
+        particleSystem.render();
         if (!myLunarLander.hasCrashed && !myLunarLander.hasLanded) {
             renderer.LunarLander.render(myLunarLander);
         }
@@ -75,17 +69,63 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
             requestAnimationFrame(gameLoop);
         }
         else if (continuePlaying) { // just beat level 1
-            console.log("GOING TO LEVEL 2");
             resetVariables();
-            initialize(1);
-            run();
+            run(1);
         }
         else if (hasWon) {
             highscores.push(myLunarLander.score);
             highscores.sort(function(a, b){return b-a});
             highscores = highscores.splice(0, 5);
             localStorage['highscores'] = JSON.stringify(highscores);
-            setHighScores();
+            resetVariables();
+            initialize();
+        }
+    }
+
+    function checkUpdates(elapsedTime) {
+        if ((myLunarLander.hasCrashed || myLunarLander.hasLanded) && !updatedLevel) {
+            if (level == 2) {
+                level = 1;
+                continuePlaying = false;
+                hasWon = myLunarLander.hasLanded;
+            }
+            else {
+                level = myLunarLander.hasLanded ? 2 : 1;
+                continuePlaying = myLunarLander.hasLanded;
+            }
+            updatedLevel = true;
+        }
+        if (myLunarLander.hasCrashed) {
+            particleSystem.shipCrash(elapsedTime);
+            if (isExploding === 2000) audio.Explosion.play();
+            else if (isExploding < 0) audio.Explosion.stop();
+            isExploding -= elapsedTime;
+        }
+        else if(myLunarLander.hasLanded) {
+            if (!isLanded) {
+                isLanded = true;
+                audio.Landing.play();
+            }
+        }
+    }
+
+    function thrustWithAudioParticles(elapsedTime) {
+        if (!myLunarLander.hasCrashed && !myLunarLander.hasLanded) {
+            if (!isThrusting && myLunarLander.fuel > 0) {
+                isThrusting = true;
+                audio.Thrust.play();
+            }
+            if (myLunarLander.fuel > 0) {
+                particleSystem.shipThrust(elapsedTime);
+            }
+        }
+        myLunarLander.thrust(elapsedTime);
+    }
+    
+    function stopThrust() {
+        if (isThrusting) {
+            isThrusting = false;
+            audio.Thrust.stop();
         }
     }
 
@@ -99,20 +139,17 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
 
     function setKeyboard() {
         rotateLeft = localStorage.getItem('rotateLeft');
+        rotateLeft = rotateLeft ? rotateLeft : 'ArrowLeft';
         rotateRight = localStorage.getItem('rotateRight');
+        rotateRight = rotateRight ? rotateRight : 'ArrowRight';
         thrust = localStorage.getItem('thrust');
-        console.log(rotateLeft + rotateRight + thrust);
-        myKeyboard.register(thrust ? thrust : 'ArrowUp', 'thrust', myLunarLander.thrust);
-        myKeyboard.register(rotateLeft ? rotateLeft : 'ArrowLeft', 'rotateLeft', myLunarLander.rotateLeft);
-        myKeyboard.register(rotateRight ? rotateRight : 'ArrowRight', 'rotateRight', myLunarLander.rotateRight);
-        myKeyboard.register('Escape', function() {
-            //
-            // Stop the game loop by canceling the request for the next animation frame
-            cancelNextRequest = true;
-            //
-            // Then, return to the main menu
-            game.showScreen('main-menu');
-        });
+        thrust = thrust ? thrust : 'ArrowUp';
+
+        myKeyboard.register(thrust, 'thrust', thrustWithAudioParticles);
+        myKeyboard.register(rotateLeft, 'rotateLeft', myLunarLander.rotateLeft);
+        myKeyboard.register(rotateRight, 'rotateRight', myLunarLander.rotateRight);
+        myKeyboard.registerKeyUp(thrust, 'stopThrustAudio', stopThrust);
+
         document.getElementById('rotateRight-button').addEventListener(
             'click', 
             function() {
@@ -121,6 +158,8 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
                 myKeyboard.unregister(previousKey, 'rotateRight');
                 myKeyboard.register(key, 'rotateRight', myLunarLander.rotateRight);
                 document.getElementById("rotateRight").innerHTML = "Rotate Right: " + key;
+                document.getElementById('changeKeyFinal-rr').classList.remove('show');
+                document.getElementById('changeKeyInitial-rr').classList.add('show');
             }
         );
         document.getElementById("rotateLeft-button").addEventListener(
@@ -131,6 +170,8 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
                 myKeyboard.unregister(previousKey, 'rotateLeft');
                 myKeyboard.register(key, 'rotateLeft', myLunarLander.rotateLeft);
                 document.getElementById('rotateLeft').innerHTML = "Rotate Left: " + key;
+                document.getElementById('changeKeyFinal-rl').classList.remove('show');
+                document.getElementById('changeKeyInitial-rl').classList.add('show');
             }
         );
         document.getElementById("thrust-button").addEventListener(
@@ -139,8 +180,11 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
                 let previousKey = localStorage.getItem('thrust');
                 let key = document.getElementById("thrust-input").value;
                 myKeyboard.unregister(previousKey, 'thrust');
-                myKeyboard.register(key, 'thrust', myLunarLander.thrust);
+                myKeyboard.unregister(previousKey, 'stopThrustAudio');
+                myKeyboard.register(key, 'thrust', thrustWithAudioParticles);
                 document.getElementById("thrust").innerHTML = "Thrust: " + key;
+                document.getElementById('changeKeyFinal-t').classList.remove('show');
+                document.getElementById('changeKeyInitial-t').classList.add('show');
             }
         );
         document.getElementById("thrust").innerHTML = "Thrust: " + thrust;
@@ -151,37 +195,41 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
 
 
     function initialize(numSafe) {
-        console.log("GAMEPLAY");
         setHighScores();
         setKeyboard();
-        // console.log(document.getElementById('rotateRight-button').onclick);
 
         let canvas = document.getElementById('id-canvas');
         renderer.Random.generateTerrain(canvas.height, canvas.width, numSafe ? numSafe : 2);
 
         document.getElementById('id-game-back').addEventListener(
             'click',
-            function() { game.showScreen('main-menu'); }
+            function() { 
+                cancelNextRequest = true;
+                continuePlaying = false;
+                hasWon = false;
+                level = 1;
+                game.showScreen('main-menu'); 
+            }
         );
-        // console.log("MADE IT TO GAMEPLAY INIT");
     }
 
     function resetVariables() {
-        // level = 1;
+        particleSystem.reset();
         myLunarLander.resetVariables({x: graphics.canvas.width / 2, y: 30, radius: 15 }, continuePlaying);
         continuePlaying = true;
         updatedLevel = false;
+        hasWon = false;
+        isLanded = false;
+        isThrusting = false;
+        isExploding = 2000;
         graphics.resetVariables();
     }
 
-    function run() {
-        console.log("RUNNING");
+    function run(numSafe) {
         lastTimeStamp = performance.now();
         cancelNextRequest = false;
-        if (myLunarLander.hasCrashed) {
-            resetVariables();
-            initialize();
-        }
+        resetVariables();
+        initialize(numSafe);
         requestAnimationFrame(gameLoop);
     }
 
@@ -191,4 +239,4 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
         resetVariables: resetVariables,
     };
 
-}(MyGame.game, MyGame.objects, MyGame.render, MyGame.graphics, MyGame.input));
+}(MyGame.game, MyGame.objects, MyGame.render, MyGame.graphics, MyGame.input, MyGame.audio));

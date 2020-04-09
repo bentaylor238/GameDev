@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <title>Frogger</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+
+    <!-- <body onload="MyGame.game.initialize();"> -->
+    <body>
+        <div style="display: flex; flex-direction: row;">
+            <!-- <div width="33%" style="align-items: center; justify-content: center; vertical-align: middle;">
+                <img src="assets/moonlanding.jpg" />
+            </div> -->
+            <div id="game-container" width="33%" style="vertical-align: middle;">
+                <div id="main-menu" class="screen">
+                    <button id="id-new-game">Play</button>
+                    <button id="id-high-scores">Highscores</button>
+                    <button id="id-options">Options</button>
+                    <button id="id-about">About</button>
+                </div>
+                <div id="game-play" class="screen">
+                    <div style="display: flex; flex-direction: column;">
+                        <canvas id="id-canvas" width="520" height="520">
+
+                        </canvas>
+                        <button width="20px" id="id-game-back">Main Menu</button>
+                    </div>
+                </div>
+                <div id="high-scores" class="screen">
+                    <button id="id-high-scores-back">Main Menu</button>
+                    <div>
+                        <div><text>Highscores</text></div>
+                        <div><p id="first"></p></div>
+                        <div><p id="second"></p></div>
+                        <div><p id="third"></p></div>
+                        <div><p id="fourth"></p></div>
+                        <div><p id="fifth"></p></div>
+                    </div>
+                </div>
+                <div id="options" class="screen">
+                    <button id="id-options-back">Main Menu</button>
+                    <div>
+                        <div style="display: flex; flex-direction: row;">
+                            <p id="moveRight"></p>
+                            <div class="button show" id="changeKeyInitial-mr">
+                                <button id="mr-changeKey">Change Key</button>
+                            </div>
+                            <div class="button" id="changeKeyFinal-mr">
+                                <input type="text" id="moveRight-input"/>
+                                <button id="moveRight-button">Change Key</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: row;">
+                            <p id="moveLeft"></p>
+                            <div class="button show" id="changeKeyInitial-ml">
+                                <button id="ml-changeKey">Change Key</button>
+                            </div>
+                            <div class="button" id="changeKeyFinal-ml">
+                                <input type="text" id="moveLeft-input"/>
+                                <button id="moveLeft-button">Change Key</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: row;">
+                            <p id="moveUp"></p>
+                            <div class="button show" id="changeKeyInitial-mu">
+                                <button id="mu-changeKey">Change Key</button id="mu-changeKey">
+                            </div>
+                            <div class="button" id="changeKeyFinal-mu">
+                                <input type="text" id="moveUp-input"/>
+                                <button id="moveUp-button">Change Key</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: row;">
+                            <p id="moveDown"></p>
+                            <div class="button show" id="changeKeyInitial-md">
+                                <button id="md-changeKey">Change Key</button id="md-changeKey">
+                            </div>
+                            <div class="button" id="changeKeyFinal-md">
+                                <input type="text" id="moveDown-input"/>
+                                <button id="moveDown-button">Change Key</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="about" class="screen">
+                    <button id="id-about-back">Main Menu</button>
+                    <div>
+                        <p>Best scores are made by using the least fuel to land and having the lowest speed when landing. <br><br>
+                            To set the keys put lowercase letters or, if wanting arrow keys, put "ArrowUp" or "ArrowLeft" without the quotes.<br><br>
+                            Lunar Lander game created by Ben Taylor 2020</p>
+                    </div>
+                </div>
+            </div>  
+            <!-- <div width="33%">
+                <img src="assets/rocketship.jpg" />
+            </div> -->
+        </div>
+
+        <script data-main="scripts/loader" src="scripts/require.js"></script>
+        <!-- <script>
+            let MyGame = {
+                screens : {},
+                input: {},
+                objects: {},
+                render: [],
+                audio: {}
+            };
+        </script>
+        <script src = "scripts/objects/lunarlander.js"></script>
+        <script src = "scripts/objects/background.js"></script>
+        <script src = "scripts/render/core.js"></script>
+        <script src = "scripts/render/lunarlander.js"></script>
+        <script src = "scripts/render/background.js"></script>
+        <script src = "scripts/render/random-nums.js"></script>
+        <script src = "scripts/input-keyboard.js"></script>
+        <script src = "scripts/audio/explosion.js"></script>
+        <script src = "scripts/audio/thrust.js"></script>
+        <script src = "scripts/audio/landing.js"></script>
+        <script src = "scripts/particle-system-explosion.js"></script>
+        <script src = "scripts/particle-system-thrust.js"></script>
+        <script src = "scripts/particleSystem.js"></script>
+        
+        <script src = "scripts/game.js"></script>
+        <script src = "scripts/gameplay.js"></script>
+        <script src = "scripts/mainmenu.js"></script>
+        <script src = "scripts/highscores.js"></script>
+        <script src = "scripts/options.js"></script>
+        <script src = "scripts/about.js"></script> -->
+
+    </body>
+
+    
+</html>

@@ -1,0 +1,59 @@
+#game-container {
+    /* margin: auto; */
+    display: block;
+    width: 520px;
+    height: 520px;
+    border-style: solid;
+    border-width: 1px;
+    background-color: rgb(0, 0, 0);
+    font-size: 32px;
+    margin-right: auto;
+    margin-left: auto;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-container .screen {
+    display: none;
+}
+
+#game-container .screen.active {
+    display: block;
+}
+
+#id-new-game, #id-high-scores, #id-about, #id-options, #id-game-back, #id-high-scores-back, #id-options-back, #id-about-back, #mu-changeKey, #md-changeKey, #ml-changeKey, #mr-changeKey, #moveLeft-button, #moveRight-button, #moveUp-button, #moveDown-button {
+    border-radius: 20px;
+    padding: 8px;
+    font-family: monospace;
+}
+
+.button {
+    display: none;
+}
+
+.button.show {
+    display: block;
+}
+
+p, div {
+    color: white;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+input {
+    font-size: 24px;
+    background-color: white;
+    margin: 10px;
+    padding: 0px;
+    width: 100px;
+    border-radius: 16px;
+}
+
+body {
+    /* background-image: url("assets/stars.png");
+    background-position: center;
+    background-size: cover; */
+    background-color: black;
+}
