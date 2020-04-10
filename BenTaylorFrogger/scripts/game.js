@@ -15,7 +15,7 @@ MyGame.game = (function(screens) {
     //------------------------------------------------------------------
     function showScreen(id) {
         // console.log(id);
-
+        MyGame.audio.Background.stop();
         //
         // Remove the active state from all screens.  There should only be one...
         let active = document.getElementsByClassName('active');
@@ -24,6 +24,7 @@ MyGame.game = (function(screens) {
         }
         //
         // Tell the screen to start actively running
+        if (id === 'game-play') MyGame.audio.Background.play();
         screens[id].run();
         //
         // Then, set the new screen to be active

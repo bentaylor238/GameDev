@@ -22,6 +22,7 @@ MyGame.objects.System = function() {
   let hasWon = false;
   let hasUpdatedWinning = false;
   let timer = 30000;
+  let particleTimer = 500;
   // let reachedGoal = false;
   let score = 0;
 
@@ -52,6 +53,24 @@ MyGame.objects.System = function() {
       hasReached: false 
     });
   }
+  ///
+  //1. Fix scoring to give points for every 1/2 secon
+
+  ///
+  //3. Add bugs
+
+  ///
+  //4. Add alligators
+
+  ///
+
+  let gutsPS = MyGame.objects.ParticleSystemGuts({
+    center: frog.center,
+    rotation: frog.rotation,
+    size: {mean: 5, stdev: 2},
+    speed: {mean: 0.05, stdev: 0.02},
+    lifetime: {mean: 350, stdev: 50}
+  });
 
   let vehicles = MyGame.objects.Vehicles();
   let river = MyGame.objects.River();
@@ -63,6 +82,7 @@ MyGame.objects.System = function() {
     lives.resetVariables();
     river.reset();
     vehicles.reset();
+    gutsPS.reset();
     let node = null;
     for (node in lillipads) {
       lillipads[node].reset();
@@ -75,37 +95,63 @@ MyGame.objects.System = function() {
     score = 0;
     frogVert = 0;
     timer = 30000;
+    particleTimer = 500;
     // setKeyboard();
   }
 
   function update(elapsedTime) {
-    timer -= elapsedTime;
+    let pad = null;
+    for (pad in lillipads) {
+      lillipads[pad].update(elapsedTime);
+    }
     if (!hasWon && !hasLost) {
+      timer -= elapsedTime;
+      if (timer < 5000 && timer > 0) MyGame.audio.LowTime.play();
+      else MyGame.audio.LowTime.stop();
       frog.update(elapsedTime);
+      if (hasDied && particleTimer > 0) {
+        particleTimer -= elapsedTime;
+        gutsPS.updateAndCreate(elapsedTime);
+      } else {
+        hasDied = false;
+        particleTimer = 500;
+        gutsPS.reset();
+      }
       let frogDied = vehicles.update(elapsedTime, frogVert, frog.center.x, frog.size.width);
       let frogAdjust = river.update(elapsedTime, frogVert, frog.center.x);
-      if (frogVert >= 7 && frogVert < 12 && !frog.moving) {
+      if (timer < 0) {
+        killFrog();
+      }
+      else if (frogVert >= 7 && frogVert < 12 && !frog.moving && !hasDied) {
         // console.log(frogAdjust);
         if (frogAdjust === -1) {
           // RESET and frog loses a life
           killFrog();
+          MyGame.audio.Sinking.play();
         }
         else frog.moveHorizontal(frogAdjust);
 
         if (frog.center.x - frog.size.width / 2 < 0 || frog.center.x + frog.size.width / 2 > canvas.width) killFrog();
-      } else if (frogVert < 6 && frogVert >= 1 && !frog.moving) {
+      } else if (frogVert < 6 && frogVert >= 1 && !frog.moving && !hasDied) {
         if (frogDied) {
           console.log("FROG HIT A CAR ", frogDied);
+          gutsPS.setCenter(frog.center.x, frog.center.y, 1, frogVert % 2 === 1 ? Math.PI * 3/2 : Math.PI/2);
           killFrog();
+          MyGame.audio.Squish.play();
           hasDied = true;
         }
-      } else if (frogVert === 12 && !frog.moving) {
+      } else if (frogVert === 12 && !frog.moving && !hasDied) {
         let lilli = frog.checkLillipads(lillipadGoals);
-        if (lilli === -1 || lillipadGoals[lilli].hasReached) killFrog();
+        if (lilli === -1 || lillipadGoals[lilli].hasReached) {
+          MyGame.audio.Sinking.play();
+          killFrog();
+        }
         else {
+          MyGame.audio.ReachedGoal.play();
+          score += (Math.floor(timer / 500) * 10);
           timer = 30000;
           score += 50;
-          lillipads[lilli].update(elapsedTime, true);
+          lillipads[lilli].updateHasReached(true);
           lillipadGoals[lilli].hasReached = true;
           frogVert = 0;
           frog.resetPosition({ x: canvas.width / 2, y: canvas.height / 13 / 2 + canvas.height * 12 / 13 });
@@ -122,23 +168,10 @@ MyGame.objects.System = function() {
         }
       } 
       lives.update(frog.lives);
-      // let goalCount = 0;
-      // if (reachedGoal) {
-      //   console.log("REACHED GOAL");
-      //   for (let i = 0; i < 5; i++) {
-      //     if (frog.center.x > lillipadGoals[i].left && frog.center.x < lillipadGoals[i].right) {
-      //       console.log("REACHED A LILLIPAD");
-      //       lillipads[i].update(elapsedTime, true);
-      //       lillipadGoals[i].hasReached = true;
-      //       frogVert = 0;
-      //       frog.resetPosition({ x: canvas.width / 2, y: canvas.height / 13 / 2 + canvas.height * 12 / 13 });
-      //     }
-      //     if (lillipads[i].hasReached) goalCount++;
-      //   }
-      //   reachedGoal = false;
-      // }
-      // if (goalCount === 5) hasWon = true;
+    } else if (hasWon || hasLost) {
+      MyGame.audio.Background.stop();
     }
+    return hasWon;
   }
 
   function killFrog() {
@@ -156,29 +189,33 @@ MyGame.objects.System = function() {
     river.render();
     vehicles.render();
     lives.render();
+    MyGame.graphics.drawTimeAndScore(timer, score);
     frog.render();
+    if (hasDied) gutsPS.render();
     if (hasLost || hasWon) {
       MyGame.graphics.drawResults(hasWon, score);
     }
   }
 
   function moveUp() {
-    let temp = frog.moveUp(lillipadGoals)
-    if (temp === 1) score += 10;
-    frogVert += temp;
+    if (!hasDied) {
+      let temp = frog.moveUp(lillipadGoals)
+      if (temp === 1) score += 10;
+      frogVert += temp;
+    }
   }
 
   function moveDown() {
-    frogVert -= frog.moveDown();
+    if (!hasDied) frogVert -= frog.moveDown();
     // console.log("FROGVERT ", frogVert);
   }
 
   function moveLeft() {
-    frog.moveLeft();
+    if (!hasDied) frog.moveLeft();
   }
 
   function moveRight() {
-    frog.moveRight();
+    if (!hasDied) frog.moveRight();
   }
   // console.log("MADE IT TO SYSTEM");
 

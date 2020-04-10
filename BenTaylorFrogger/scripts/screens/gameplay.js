@@ -30,8 +30,8 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
     }
 
     function update(elapsedTime) {
-        system.update(elapsedTime);
-        hasWon = system.hasWon;
+        hasWon = system.update(elapsedTime);
+        if (hasWon) cancelNextRequest = true;
         // particleSystem.setCenter();
         // particleSystem.update(elapsedTime);
         // checkUpdates(elapsedTime);
@@ -64,6 +64,7 @@ MyGame.screens['game-play'] = (function(game, objects, renderer, graphics, input
             highscores = highscores.splice(0, 5);
             localStorage['highscores'] = JSON.stringify(highscores);
             hasUpdatedScores = true;
+            setHighScores();
         }
     }
 

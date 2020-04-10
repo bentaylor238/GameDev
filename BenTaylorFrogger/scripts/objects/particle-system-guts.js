@@ -1,7 +1,10 @@
-function ParticleSystemThrust(graphics, Random, spec) {
+MyGame.objects.ParticleSystemGuts = function(spec) {
     let that = {};
     let particles = [];
     let center = {};
+
+    spec.image = new Image();
+    spec.image.src = '../assets/guts.png';
 
     that.reset = function() {
         particles = [];
@@ -32,7 +35,7 @@ function ParticleSystemThrust(graphics, Random, spec) {
         };
 
         that.draw = function() {
-            graphics.drawTexture(spec.image, spec.center, spec.rotation, spec.size);
+            MyGame.graphics.drawImage(spec.image, spec.center, spec.rotation, spec.size);
         };
 
         return that;
@@ -58,15 +61,15 @@ function ParticleSystemThrust(graphics, Random, spec) {
         particles = keepMe;
 
         for (let particle = 0; particle < 5; particle++) {
-            let size = Math.abs(Random.nextGaussian(spec.size.mean, spec.size.stdev));
+            let size = Math.abs(MyGame.render.Random.nextGaussian(spec.size.mean, spec.size.stdev));
             let p = create({
                 image: spec.image,
                 center: { x: center.x - Math.sin(spec.rotation) * center.radius, y: center.y + Math.cos(spec.rotation) * center.radius},
                 size: {width: size, height: size},
                 rotation: 0,
-                speed: Math.abs(Random.nextGaussian(spec.speed.mean, spec.speed.stdev)),
-                direction: {x: -1 * Math.sin(spec.rotation) + Random.nextGaussian(0, 0.3), y: Math.cos(spec.rotation) + Random.nextGaussian(0, 0.3)},
-                lifetime: Random.nextGaussian(spec.lifetime.mean, spec.lifetime.stdev)
+                speed: Math.abs(MyGame.render.Random.nextGaussian(spec.speed.mean, spec.speed.stdev)),
+                direction: {x: -1 * Math.sin(spec.rotation) + MyGame.render.Random.nextGaussian(0, 0.3), y: Math.cos(spec.rotation) + MyGame.render.Random.nextGaussian(0, 0.3)},
+                lifetime: MyGame.render.Random.nextGaussian(spec.lifetime.mean, spec.lifetime.stdev)
             });
             particles.push(p);
         }
@@ -74,15 +77,15 @@ function ParticleSystemThrust(graphics, Random, spec) {
 
     that.createParticles = function() {
         for (let particle = 0; particle < 5; particle++) {
-            let size = Math.abs(Random.nextGaussian(spec.size.mean, spec.size.stdev));
+            let size = Math.abs(MyGame.render.Random.nextGaussian(spec.size.mean, spec.size.stdev));
             let p = create({
                 image: spec.image,
                 center: { x: center.x - Math.sin(spec.rotation) * center.radius, y: center.y + Math.cos(spec.rotation) * center.radius},
                 size: {width: size, height: size},
                 rotation: 0,
-                speed: Math.abs(Random.nextGaussian(spec.speed.mean, spec.speed.stdev)),
-                direction: {x: -1 * Math.sin(spec.rotation) + Random.nextGaussian(0, 0.3), y: Math.cos(spec.rotation) + Random.nextGaussian(0, 0.3)},
-                lifetime: Random.nextGaussian(spec.lifetime.mean, spec.lifetime.stdev)
+                speed: Math.abs(MyGame.render.Random.nextGaussian(spec.speed.mean, spec.speed.stdev)),
+                direction: {x: -1 * Math.sin(spec.rotation) + MyGame.render.Random.nextGaussian(0, 0.3), y: Math.cos(spec.rotation) + MyGame.render.Random.nextGaussian(0, 0.3)},
+                lifetime: MyGame.render.Random.nextGaussian(spec.lifetime.mean, spec.lifetime.stdev)
             });
             particles.push(p);
         }

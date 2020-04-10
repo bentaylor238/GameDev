@@ -23,24 +23,16 @@ MyGame.loader = (function() {
           message: 'Inputs loaded',
           onComplete: null
       }, {
-          scripts: ['render/core'],
+          scripts: ['render/core', 'render/random-nums'],
           message: 'Rendering core loaded',
           onComplete: null
       }, {
-          scripts: ['objects/background', 'objects/sprite2', 'objects/movers/mover', 'objects/movers/alligator', 'objects/movers/turtle', 'objects/movers/vehicles', 'objects/movers/river', 'objects/sprite', 'objects/lives', 'objects/frog', 'objects/lillipad', 'objects/system'],
+          scripts: ['objects/background', 'objects/particle-system-guts', 'objects/particle-system-sparkle', 'objects/sprite2', 'objects/movers/mover', 'objects/movers/alligator', 'objects/movers/turtle', 'objects/movers/vehicles', 'objects/movers/river', 'objects/sprite', 'objects/lives', 'objects/frog', 'objects/lillipad', 'objects/system'],
           message: 'Objects loaded',
           onComplete: null
       }, {
-          scripts: ['render/random-nums', 'render/lunarlander'],
-          message: 'Rendering loaded',
-          onComplete: null
-      }, {
-          scripts: ['audio/explosion', 'audio/landing', 'audio/thrust'],
+          scripts: ['audio/background', 'audio/hop', 'audio/sinking', 'audio/squish', 'audio/reached-goal', 'audio/low-time'],
           message: 'Audio loaded',
-          onComplete: null
-      },  {
-          scripts: ['particle-system-explosion', 'particle-system-thrust', 'particleSystem'],
-          message: 'Particle System loaded',
           onComplete: null
       }, {
           scripts: ['game'],
@@ -52,34 +44,13 @@ MyGame.loader = (function() {
         onComplete: null
       }];
   let assetOrder = [{
-          key: 'space',
-          source: '/assets/space.jpg'
-      }, {
-          key: 'stars',
-          source: '/assets/stars.png'
-      }, {
           // Source: http://www.xojo3d.com/tut015.php
           // License: Public domain as noted at the bottom of the page
-          key: 'lunarlander',
-          source: '/assets/lunarlander.png'
+          key: 'guts',
+          source: '/assets/guts.png'
       }, {
-          key: 'moonlanding',
-          source: '/assets/moonlanding.jpg'
-      }, {
-          key: 'fire',
-          source: '/assets/fire.png',
-      }, {
-          key: 'rocketship',
-          source: '/assets/rocketship.jpg'
-      }, {
-          key: 'smoke',
-          source: '/assets/smoke-2.png'
-      }, {
-          key: 'thrust',
-          source: '/assets/thrust.png'
-      }, {
-          key: 'logo',
-          source: '/assets/USU-Logo.png'
+          key: 'sparkle',
+          source: '/assets/sparkle.png'
       }, {
           key: 'background',
           source: '/assets/background.png'
@@ -122,6 +93,24 @@ MyGame.loader = (function() {
       }, {
           key: 'alligator-sprites',
           source: '/assets/alligator.png'
+      }, {
+          key: 'background',
+          source: '/audio/background.mp3'
+      }, {
+          key: 'hop',
+          source: '/audio/frog-hop.mp3'
+      }, {
+          key: 'sinking',
+          source: '/audio/sinking.mp3'
+      }, {
+          key: 'squish',
+          source: '/audio/frog-squash.mp3'
+      }, {
+          key: 'reached-goal',
+          source: '/audio/frog-success.mp3'
+      }, {
+          key: 'low-time',
+          source: '/audio/low-time.mp3'
       }];
 
   //------------------------------------------------------------------

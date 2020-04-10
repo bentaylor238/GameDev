@@ -94,32 +94,15 @@ MyGame.graphics = (function() {
     //     context.fill();
     // }
 
-    function drawStatistics(lunarLander) {
-        context.font = "12px Arial";
+    function drawTimeAndScore(time, score) {
+        context.font = "16px Arial";
         context.textAlign = "center";
-        if (lunarLander.fuel > 0) {
-            context.fillStyle = "green";
-        }
-        else {
-            context.fillStyle = "white";
-        }
-        context.fillText("Fuel: " + lunarLander.fuel.toFixed(3) + "%", canvas.width * 0.9, 20);
-
-        if (Math.floor(lunarLander.getRotationDegrees()) <= 5 || Math.ceil(lunarLander.getRotationDegrees()) >= 355) {
-            context.fillStyle = "green";
-        }
-        else {
-            context.fillStyle = "white";
-        }
-        context.fillText("Angle: " + lunarLander.getRotationDegrees().toFixed(3), canvas.width * 0.9, 50);
-        
-        if (lunarLander.momentum < 2) {
-            context.fillStyle = "green";
-        }
-        else {
-            context.fillStyle = "white";
-        }
-        context.fillText("Speed: " + lunarLander.momentum.toFixed(3) + "m/s", canvas.width * 0.9, 35);
+        context.fillStyle = "black";
+        context.fillText("Score: " + score, canvas.width/13 * 4, canvas.height / 13 * 12.5 + 5);
+        let time2 = Math.floor(time/1000);
+        context.fillText(time2 < 0 ? 0 : time2, canvas.width / 13 * 8-20, canvas.height / 13 * 12.5+5);
+        context.fillStyle = "green";
+        context.fillRect(canvas.width - (canvas.width / 13 * 5 * (time / 30000)), canvas.height / 13 * 12 + 10, canvas.width / 13 * 5 * (time / 30000), canvas.height / 13 - 20);
     }
 
     function drawResults(hasWon, score) {
@@ -140,7 +123,7 @@ MyGame.graphics = (function() {
         drawSprite: drawSprite,
         drawBackground: drawBackground,
         // drawTerrain: drawTerrain,
-        drawStatistics: drawStatistics,
+        drawTimeAndScore: drawTimeAndScore,
         drawResults: drawResults,
         resetVariables: resetVariables,
         get points() { return points; },

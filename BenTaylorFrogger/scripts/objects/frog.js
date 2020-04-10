@@ -50,48 +50,38 @@ MyGame.objects.Frog = function(spec) {
 
   function moveRight() {
     if (!moving && spec.center.x + spec.size.width < MyGame.graphics.canvas.width && !onTop) {
-      // console.log("MOVING RIGHT");
+      MyGame.audio.Hop.play();
       moving = true;
       rotation = - Math.PI / 2;
       goalCenter = { x: spec.center.x + spec.size.width, y: spec.center.y };
       moveRate = (goalCenter.x - spec.center.x) / 7;
-      // horizontalIndex++;
     }
   }
 
   function moveLeft() {
     if (!moving && spec.center.x - spec.size.width > 0 && !onTop) {
+      MyGame.audio.Hop.play();
       moving = true;
-      // console.log("MOVING LEFT");
       rotation = Math.PI / 2;
       goalCenter = { x: spec.center.x - spec.size.width, y: spec.center.y };
       moveRate = (spec.center.x - goalCenter.x) / 7;
-      // horizontalIndex--;
     }
   }
 
   function moveUp(lillipads) {
     if (!moving) {
       if (spec.center.y - spec.size.height < MyGame.graphics.canvas.height / 13 && spec.center.y - spec.size.height > 0) {
-        // let horizontalIndex = 0;
-        // let xDistance = spec.center.x;
-        // while (xDistance > spec.size.width) {
-        //   horizontalIndex++;
-        //   xDistance -= spec.size.width;
-        // }
-        // if (horizontalIndex === 1 || horizontalIndex === 3 || horizontalIndex === 6 || horizontalIndex === 9 || horizontalIndex === 11) {
-          moving = true;
-          onTop = true;
-          // console.log("MOVING UP");
-          rotation = Math.PI;
-          goalCenter = { x: spec.center.x, y: spec.center.y - spec.size.height };
-          moveRate = (spec.center.y - goalCenter.y) / 7;
-          return 1;
-        // }
+        MyGame.audio.Hop.play();
+        moving = true;
+        onTop = true;
+        rotation = Math.PI;
+        goalCenter = { x: spec.center.x, y: spec.center.y - spec.size.height };
+        moveRate = (spec.center.y - goalCenter.y) / 7;
+        return 1;
       }
       else if (spec.center.y - spec.size.height > 0) {
+        MyGame.audio.Hop.play();
         moving = true;
-        // console.log("MOVING UP");
         rotation = Math.PI;
         goalCenter = { x: spec.center.x, y: spec.center.y - spec.size.height };
         moveRate = (spec.center.y - goalCenter.y) / 7;
@@ -104,6 +94,7 @@ MyGame.objects.Frog = function(spec) {
   function moveDown() {
     if (!moving && spec.center.y + spec.size.height < MyGame.graphics.canvas.height) {
       moving = true;
+      MyGame.audio.Hop.play();
       onTop = false;
       // console.log("MOVING DOWN");
       rotation = 0;

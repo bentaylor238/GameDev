@@ -77,8 +77,11 @@ MyGame.render.Random = (function (graphics) {
     }
 
     function nextRange(min, max) {
+        // console.log("SPARKLE MADE IT TO NEXT RANGE");
         var range = max - min + 1;
-        return Math.floor((next * range) + min);
+        // console.log("RANGE: ", range);
+        // console.log("NEXT: ", next);
+        return Math.floor(Math.random() * range) + min;
     }
 
     function nextCircleVector() {
